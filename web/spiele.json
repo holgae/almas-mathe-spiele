@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Rechnen bis 20",
+    "description": "Plus und Minus mit anschaulichen Hilfen.",
+    "emoji": "🌱",
+    "href": "spiele/bis-20.html"
+  },
+  {
+    "title": "Rechnen bis 100",
+    "description": "Zehner und Einer · Mit und ohne Zehnerübergang.",
+    "emoji": "🌳",
+    "href": "spiele/bis-100.html"
+  }
+]

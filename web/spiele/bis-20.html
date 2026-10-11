@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zahlenzauber – Rechnen bis 20</title>
+<style>
+:root{font-family:ui-rounded,'Trebuchet MS',sans-serif;color:#26334b;background:#f7f5ef}*{box-sizing:border-box}body{margin:0;padding:24px 16px;min-height:100vh;background:radial-gradient(ellipse at top left,#e0f3e8,transparent 60%),radial-gradient(ellipse at bottom right,#fce5ca,transparent 60%),#f7f5ef}main{max-width:640px;margin:auto}header{text-align:center;margin:14px 0 26px}.badge{font-size:13px;letter-spacing:2px;font-weight:bold;color:#427765}h1{font-size:clamp(32px,7vw,46px);margin:10px 0}header p{color:#627084;margin:0;line-height:1.5}.card{background:#fff;border:1px solid #e5e9e4;border-radius:28px;padding:26px;box-shadow:0 12px 40px #3449370b}.modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:4px solid #df9b27;outline-offset:4px}.mode{border:1px solid #dbe4df;border-radius:14px;padding:10px 15px;background:#f8faf8;color:#425866}.mode[aria-pressed=true]{background:#275f50;color:white;border-color:#275f50}.progress{display:flex;justify-content:space-between;font-size:14px;color:#627084;margin:26px 0 10px}.track{height:9px;background:#edf1ed;border-radius:20px;overflow:hidden}.fill{height:100%;background:#eeb84f;width:0;transition:width .3s}.task{text-align:center;font-size:clamp(42px,10vw,64px);font-weight:bold;margin:30px 0 24px;letter-spacing:2px}.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.answer{border:2px solid #e1e9e3;border-radius:18px;background:#f6faf7;padding:18px;font-size:30px;font-weight:bold;color:#275f50}.answer:hover:not(:disabled){background:#e6f3e9;border-color:#81b39b}.answer:disabled{cursor:default}.answer.wrong{background:#fff0db;border-color:#e4b777}.answer.right{background:#d9f2de;border-color:#63a77e}.feedback{min-height:56px;text-align:center;margin:20px 0 10px;line-height:1.5;font-size:18px;font-weight:bold}.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.primary,.secondary{border-radius:14px;padding:13px 20px;font-weight:bold}.primary{background:#275f50;color:white;border:2px solid #275f50}.secondary{background:white;color:#536779;border:2px solid #e2e8e3}[hidden]{display:none!important}.help{background:#fff8e9;padding:16px;border-radius:16px;margin:16px 0;text-align:center;line-height:1.6}.dots{display:flex;align-items:center;justify-content:center;gap:4px;margin:24px auto 12px;width:max-content;max-width:100%}.dots .dot{width:clamp(6px,2.8vw,20px);height:clamp(6px,2.8vw,20px);flex-shrink:0;font-size:clamp(6px,2.8vw,16px);line-height:clamp(6px,2.8vw,20px)}.ten-line{position:relative;align-self:center;width:1px;height:30px;background:#bdc3b6;margin:0 5px;flex-shrink:0}.ten-line span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);color:#899286;font-size:11px;line-height:1}.dot{width:20px;height:20px;border-radius:50%;background:#65a58d;display:inline-block}.dot.extra{background:#eab64d}.dot.removed{background:#eee;color:#88918c;text-align:center;line-height:20px}.finish{text-align:center;padding:24px 0}.finish .big{font-size:60px}.finish h2{font-size:30px}footer{text-align:center;color:#68766d;font-size:13px;margin:22px 0;line-height:1.6}@media(max-width:400px){.card{padding:20px}.mode{padding:9px 11px}}
+.dot.covered{background:transparent;border:1px dashed #cbd4c9}.help .primary{margin-top:12px}.help .primary:disabled{opacity:.65;cursor:default}.dot{transition:background .3s}
+</style>
+</head>
+<body>
+<main><nav style="margin-bottom:20px"><a href="../index.html" style="display:inline-block;color:#275f50;font-weight:bold;padding:12px;border:2px solid #dbe4df;border-radius:14px;text-decoration:none">← Zur Spielauswahl</a></nav>
+<header><div class="badge">KLEINE ZAHLEN · GROSSER SPASS</div><h1>🌼 Zahlenzauber</h1><p>Plus und Minus bis 20.<br>Ganz in deinem Tempo.</p></header>
+<section class="card" aria-label="Rechenspiel">
+<div class="modes" aria-label="Aufgaben auswählen"><button class="mode" data-mode="mixed" aria-pressed="true">Plus & Minus</button><button class="mode" data-mode="plus" aria-pressed="false">Nur Plus</button><button class="mode" data-mode="minus" aria-pressed="false">Nur Minus</button></div>
+<div class="progress"><span id="round">Aufgabe 1 von 10</span><span id="stars">⭐ 0 von 10</span></div><div class="track"><div class="fill" id="fill"></div></div>
+<div id="play"><div class="task" id="task" aria-label="Rechenaufgabe"></div><div class="answers" id="answers"></div><div class="feedback" id="feedback" role="status" aria-live="polite">Welche Zahl passt?</div><div class="help" id="help" hidden></div><div class="actions"><button class="secondary" id="hint">💡 Zeig mir eine Hilfe</button><button class="primary" id="next" hidden>Weiter →</button></div></div>
+<div class="finish" id="finish" hidden><div class="big">🌟</div><h2>Wunderbar gerechnet!</h2><p>Du hast alle 10 Aufgaben geschafft.<br>Deine Sterne leuchten für dich!</p><button class="primary" id="restart">Noch eine Runde</button></div>
+</section><footer>Version 2 · 9 von 10 Aufgaben mit Zehnerübergang<br>Kein Zeitdruck. Jeder Versuch zählt. 💛<br>Du kannst auch die Tasten 1, 2, 3 und 4 benutzen.</footer>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+let mode='mixed',done=0,current,solved=false,last='';
+const random=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+function makeTask(){
+ const op=mode==='plus'?'+':mode==='minus'?'−':Math.random()<.5?'+':'−';
+ const crossing=done<9;
+ const candidates=[];
+ for(let a=0;a<=20;a++)for(let b=1;b<=9;b++){
+   const result=op==='+'?a+b:a-b;
+   const crossesTen=op==='+'?a<10&&result>10:a>10&&result<10;
+   if(result>=0&&result<=20&&crossesTen===crossing&&a+op+b!==last)candidates.push({a,b,op,result});
+ }
+ const task=candidates[random(0,candidates.length-1)];
+ last=task.a+task.op+task.b;return task;
+}
+function update(){ $('round').textContent=`Aufgabe ${Math.min(done+1,10)} von 10`;$('stars').textContent=`⭐ ${done} von 10`;$('fill').style.width=done*10+'%'; }
+function showTask(){
+ current=makeTask();solved=false;update();$('task').textContent=`${current.a} ${current.op} ${current.b} = ?`;
+ $('feedback').textContent='Welche Zahl passt?';$('help').hidden=true;$('next').hidden=true;$('hint').hidden=false;
+ const choices=new Set([current.result]);while(choices.size<4)choices.add(random(Math.max(0,current.result-5),Math.min(20,current.result+5)));
+ const shuffled=[...choices];for(let i=shuffled.length-1;i>0;i--){const j=random(0,i);[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+ $('answers').replaceChildren();shuffled.forEach(value=>{const button=document.createElement('button');button.className='answer';button.textContent=value;button.setAttribute('aria-label',`Antwort ${value}`);button.onclick=()=>answer(button,value);$('answers').append(button)});
+}
+function answer(button,value){
+ if(solved)return;
+ if(value!==current.result){button.classList.add('wrong');button.disabled=true;$('feedback').textContent='Fast! Versuch es noch einmal. 💛';return}
+ solved=true;done++;button.classList.add('right');document.querySelectorAll('.answer').forEach(b=>b.disabled=true);
+ $('feedback').textContent=['Super gemacht! ⭐','Das stimmt! 🌼','Toll gerechnet! 🌟'][random(0,2)];update();$('round').textContent=`Aufgabe ${done} von 10`;$('next').hidden=false;$('next').textContent=done===10?'Meine Sterne ansehen ✨':'Weiter →';$('hint').hidden=true;$('next').focus();
+}
+function dot(type=''){const span=document.createElement('span');span.className='dot '+type;if(type==='removed')span.textContent='×';return span}
+ $('hint').onclick=()=>{
+ const {a,b,op,result}=current, help=$('help');help.replaceChildren();help.hidden=false;$('hint').hidden=true;
+ const label=document.createElement('div');label.setAttribute('aria-live','polite');
+ label.textContent=`Starte mit ${a} grünen Punkten. Tippe dich durch die Rechnung!`;
+ help.append(label);
+ const dots=document.createElement('div');dots.className='dots';dots.setAttribute('aria-hidden','true');
+ const points=[];
+ for(let i=0;i<(op==='+'?result:a);i++){
+   const point=dot();if(i>=a)point.classList.add('covered');points.push(point);dots.append(point);
+   if(i===9){const line=document.createElement('div');line.className='ten-line';const caption=document.createElement('span');caption.textContent='10';line.append(caption);dots.append(line)}
+ }
+ help.append(dots);
+ const first=op==='−'?Math.min(b,a>10?a-10:b):Math.min(b,a<10?10-a:b);
+ const rest=b-first;
+ const steps=[];
+ if(op==='−'){
+   steps.push(()=>{for(let i=a-first;i<a;i++){points[i].className='dot removed';points[i].textContent='×'}label.textContent=`① Nimm ${first} weg: ${a} − ${first} = ${a-first}.`;});
+   if(rest)steps.push(()=>{for(let i=result;i<a-first;i++){points[i].className='dot removed';points[i].textContent='×'}label.textContent=`② Nimm noch ${rest} weg: ${a-first} − ${rest} = ${result}.`;});
+ }else{
+   steps.push(()=>{for(let i=a;i<a+first;i++)points[i].className='dot extra';label.textContent=`① Lege ${first} dazu: ${a} + ${first} = ${a+first}.`;});
+   if(rest)steps.push(()=>{for(let i=a+first;i<result;i++)points[i].className='dot extra';label.textContent=`② Lege noch ${rest} dazu: ${a+first} + ${rest} = ${result}.`;});
+ }
+ steps.push(()=>{
+   for(const point of points)if(!point.className.includes('removed'))point.className='dot extra';
+   label.textContent=op==='−'?`🌟 ${a} − ${b} = ${result}. Die ${result} übrigen Punkte sind jetzt gelb!`:`🌟 ${a} + ${b} = ${result}. Alle ${result} Punkte sind jetzt gelb!`;
+ });
+ let step=0;
+ const reveal=document.createElement('button');reveal.className='primary';reveal.textContent=`🔍 Schritt 1 aufdecken`;help.append(reveal);
+ reveal.onclick=()=>{steps[step++]();if(step===steps.length){reveal.textContent='Alle Schritte aufgedeckt ✨';reveal.disabled=true}else reveal.textContent=`🔍 Schritt ${step+1} aufdecken`};
+ };
+ $('next').onclick=()=>{if(!solved)return;if(done===10){$('play').hidden=true;$('finish').hidden=false;$('round').textContent='Runde geschafft!';$('restart').focus()}else{showTask();$('answers').firstElementChild.focus()}};
+ function restart(){done=0;last='';$('play').hidden=false;$('finish').hidden=true;showTask()}
+ $('restart').onclick=restart;
+ document.querySelectorAll('.mode').forEach(button=>button.onclick=()=>{mode=button.dataset.mode;document.querySelectorAll('.mode').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));restart()});
+ document.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey||event.repeat||$('play').hidden)return;if(/^[1-4]$/.test(event.key)){const button=$('answers').children[Number(event.key)-1];if(button&&!button.disabled)button.click()}});
+ restart();
+</script>
+</body>
+</html>
