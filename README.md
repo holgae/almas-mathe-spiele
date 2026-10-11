@@ -30,4 +30,6 @@ Die Spiele sind angepasste Kopien. Die ursprünglichen HTML-Dateien wurden nicht
 
 ## Veröffentlichungsstatus
 
-Dieses Repository dient der Codeverwaltung. Eine Veröffentlichung als Website ist separat einzurichten.
+Online spielen: https://holgae.github.io/almas-mathe-spiele/
+
+GitHub Pages veröffentlicht den Inhalt von `web/` automatisch bei Änderungen auf `main`. Der Workflow liegt in `.github/workflows/pages.yml`. Die eigenständige Offline-Datei wird zusätzlich unter `/almas-mathe-spiele-offline.html` bereitgestellt.
