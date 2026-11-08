@@ -1,10 +1,10 @@
 # Almas Mathe-Spiele
 
-Kindgerechte Rechenspiele bis 20 und bis 100 mit gemeinsamer Spielauswahl.
+Kindgerechte Rechenspiele bis 20 und bis 100 sowie ein Einmaleins-Trainer mit gemeinsamer Spielauswahl.
 
 ## Spielen
 
-Die Datei `almas-mathe-spiele-offline.html` enthält beide Spiele. Zum Spielen herunterladen und im Browser öffnen. Auf Mobilgeräten hängt das Öffnen lokaler HTML-Dateien vom Gerät ab.
+Die Datei `almas-mathe-spiele-offline.html` enthält alle Spiele. Zum Spielen herunterladen und im Browser öffnen. Auf Mobilgeräten hängt das Öffnen lokaler HTML-Dateien vom Gerät ab.
 
 Die Web-Version liegt unter `web/`. Sie enthält eine installierbare PWA mit Offline-Speicherung. Zum lokalen Prüfen im Repository `python3 -m http.server 8000 --directory web` ausführen und `http://localhost:8000` öffnen. Für die Veröffentlichung den Inhalt von `web/` auf einem HTTPS-Webserver bereitstellen.
 
@@ -13,6 +13,7 @@ Die Web-Version liegt unter `web/`. Sie enthält eine installierbare PWA mit Off
 - `web/index.html`: gemeinsame Spielauswahl
 - `web/spiele/bis-20.html`: Rechnen bis 20
 - `web/spiele/bis-100.html`: Rechnen bis 100
+- `web/spiele/einmaleins.html`: Einmaleins mit frei wählbaren Reihen
 - `web/spiele.json`: Liste der Spiele
 - `web/sw.js`: Offline-Speicherung
 - `web/manifest.webmanifest`: Installation und App-Symbole

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zahlenzauber – Einmaleins</title>
+<style>
+:root{font-family:ui-rounded,'Trebuchet MS',sans-serif;color:#26334b;background:#f7f5ef}*{box-sizing:border-box}body{margin:0;padding:24px 16px;min-height:100vh;background:radial-gradient(ellipse at top left,#e0f3e8,transparent 65%),radial-gradient(ellipse at bottom right,#fce5ca,transparent 65%)}main{max-width:640px;margin:auto}header{text-align:center}h1{font-size:clamp(30px,8vw,46px)}p{line-height:1.5}.card{background:white;border:1px solid #dbe4df;border-radius:26px;padding:clamp(16px,5vw,28px)}fieldset{border:0;padding:0;margin:0}legend{font-weight:bold;margin-bottom:12px}.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:8px}.rows label{display:flex;align-items:center;justify-content:center;gap:5px;background:#f3f8f5;border-radius:12px;min-height:48px;cursor:pointer}.rows label:has(:checked){background:#d6eee0;color:#164738}.rows input{accent-color:#275f50}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a{color:#275f50}button{font:inherit;font-weight:bold;cursor:pointer;background:#f3f8f5;border:1px solid #bed7cc;border-radius:12px;padding:12px;min-height:44px}.primary{color:white;background:#275f50}button:disabled{opacity:.55;cursor:default}:focus-visible{outline:3px solid #bd760d;outline-offset:3px}[hidden]{display:none!important}.task{text-align:center;font-weight:bold;font-size:clamp(38px,10vw,64px);margin:20px 0}input[type=text]{font:inherit;width:8ch;padding:10px;border:2px solid #849c91;border-radius:10px}.progress{color:#536779}nav{margin-bottom:24px}
+</style>
+<main>
+<nav><a href="../index.html">← Zur Spielauswahl</a></nav>
+<header><h1>✖️ Einmaleins-Trainer</h1><p>Übe deine Malreihen. Ganz in deinem Tempo.</p></header>
+<section class="card" id="setup">
+<form id="settings">
+<fieldset><legend>Welche Reihen möchtest du üben?</legend><div class="rows" id="rows"></div></fieldset>
+<div class="actions"><button type="button" id="all">Alle auswählen</button><button type="button" id="none">Auswahl löschen</button></div>
+<p id="selection" role="status"></p>
+<button class="primary" id="start" disabled>10 Aufgaben starten</button>
+</form>
+</section>
+<section class="card" id="play" hidden>
+<p class="progress" id="progress"></p>
+<p class="task" id="task"></p>
+<form id="answer">
+<label for="number">Deine Antwort</label>
+<input id="number" type="text" inputmode="numeric" maxlength="3" autocomplete="off" aria-describedby="task">
+<button class="primary" id="check">Prüfen</button>
+</form>
+<p id="feedback" role="status"></p>
+<div class="actions"><button class="primary" id="next" hidden>Weiter →</button><button type="button" id="change">Reihen ändern</button></div>
+</section>
+<section class="card" id="finish" hidden>
+<h2>🌟 Runde geschafft!</h2><p id="result"></p>
+<div class="actions"><button class="primary" id="again">Noch eine Runde</button><button id="choose">Reihen ändern</button></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const rows=Array.from({length:10},(_,i)=>{
+  const label=document.createElement('label'), input=document.createElement('input');
+  input.type='checkbox'; input.value=i+1; input.checked=[2,5,10].includes(i+1);
+  label.append(input, i+1+'er'); $('rows').append(label); return input;
+});
+function selected(){return rows.filter(input=>input.checked).map(input=>Number(input.value))}
+function updateSelection(){
+  const chosen=selected();
+  $('selection').textContent=chosen.length?'Ausgewählt: '+chosen.map(n=>n+'er').join(', '):'Wähle mindestens eine Reihe.';
+  $('start').disabled=!chosen.length;
+}
+$('rows').onchange=updateSelection;
+for(const [id,checked] of [['all',true],['none',false]]) $(id).onclick=()=>{rows.forEach(input=>input.checked=checked);updateSelection()};
+function shuffle(items){
+  for(let i=items.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[items[i],items[j]]=[items[j],items[i]]}
+  return items;
+}
+function makeRound(chosen){
+  const pools=shuffle(chosen.map(row=>shuffle(Array.from({length:10},(_,i)=>[row,i+1]))));
+  const round=[];
+  for(let i=0;i<10;i++)round.push(pools[i%pools.length].pop());
+  return shuffle(round);
+}
+let tasks=[],index=0,solved=false;
+function screen(id){for(const name of ['setup','play','finish'])$(name).hidden=name!==id}
+function showTask(){
+  const [row,factor]=tasks[index];solved=false;
+  $('progress').textContent='Aufgabe '+(index+1)+' von '+tasks.length;
+  $('task').textContent=row+' × '+factor+' = ?';$('feedback').textContent='';
+  $('number').value='';$('number').disabled=false;$('check').disabled=false;$('next').hidden=true;
+  $('number').focus();
+}
+function start(){
+  const chosen=selected();if(!chosen.length)return;
+  tasks=makeRound(chosen);index=0;screen('play');showTask();
+}
+$('settings').onsubmit=e=>{e.preventDefault();start()};
+$('answer').onsubmit=e=>{
+  e.preventDefault();if(solved)return;
+  const value=$('number').value.trim(),[row,factor]=tasks[index];
+  if(!/^\d+$/.test(value)){ $('feedback').textContent='Gib eine Zahl ein.';$('number').focus();return }
+  if(Number(value)!==row*factor){$('feedback').textContent='Fast! Versuch es noch einmal. 💛';$('number').select();return}
+  solved=true;$('feedback').textContent='Richtig! ⭐';$('number').disabled=true;$('check').disabled=true;
+  $('next').hidden=false;$('next').textContent=index+1===tasks.length?'Zur Auswertung →':'Weiter →';$('next').focus();
+};
+$('next').onclick=()=>{
+  if(!solved)return;
+  if(++index<tasks.length){showTask();return}
+  $('result').textContent='Du hast alle '+tasks.length+' Aufgaben gelöst. Toll gemacht!';
+  screen('finish');$('again').focus();
+};
+function choose(){screen('setup');rows[0].focus()}
+$('change').onclick=$('choose').onclick=choose;
+$('again').onclick=start;
+updateSelection();
+</script>
+</html>

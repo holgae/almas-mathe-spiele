@@ -10,5 +10,11 @@
     "description": "Zehner und Einer · Mit und ohne Zehnerübergang.",
     "emoji": "🌳",
     "href": "spiele/bis-100.html"
+  },
+  {
+    "title": "Einmaleins-Trainer",
+    "description": "Wähle deine Malreihen von 1 bis 10 und übe sie in einer Runde.",
+    "emoji": "✖️",
+    "href": "spiele/einmaleins.html"
   }
 ]
