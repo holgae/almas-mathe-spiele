@@ -5,7 +5,7 @@
 <title>Zahlenzauber – Einmaleins</title>
 <style>
 :root{font-family:ui-rounded,'Trebuchet MS',sans-serif;color:#26334b;background:#f7f5ef}*{box-sizing:border-box}body{margin:0;padding:24px 16px;min-height:100vh;background:radial-gradient(ellipse at top left,#e0f3e8,transparent 65%),radial-gradient(ellipse at bottom right,#fce5ca,transparent 65%)}main{max-width:640px;margin:auto}header{text-align:center}h1{font-size:clamp(30px,8vw,46px)}p{line-height:1.5}.card{background:white;border:1px solid #dbe4df;border-radius:26px;padding:clamp(16px,5vw,28px)}fieldset{border:0;padding:0;margin:0}legend{font-weight:bold;margin-bottom:12px}.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:8px}.rows label{display:flex;align-items:center;justify-content:center;gap:5px;background:#f3f8f5;border-radius:12px;min-height:48px;cursor:pointer}.rows label:has(:checked){background:#d6eee0;color:#164738}.rows input{accent-color:#275f50}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a{color:#275f50}button{font:inherit;font-weight:bold;cursor:pointer;background:#f3f8f5;border:1px solid #bed7cc;border-radius:12px;padding:12px;min-height:44px}.primary{color:white;background:#275f50}button:disabled{opacity:.55;cursor:default}:focus-visible{outline:3px solid #bd760d;outline-offset:3px}[hidden]{display:none!important}.task{text-align:center;font-weight:bold;font-size:clamp(38px,10vw,64px);margin:20px 0}.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.answers button{font-size:clamp(24px,6vw,32px);min-height:60px}.answers .wrong{background:#fff0db;border-color:#d9a563}.answers .right{background:#d6eee0;border-color:#65a58d;opacity:1}.progress{color:#536779}nav{margin-bottom:24px}
-</style>
+.hint{background:#f7f4ea;border-radius:16px;padding:14px;margin-top:14px}.mat{display:grid;gap:6px;width:fit-content;max-width:100%;margin:12px auto}.rod{display:flex;align-items:center;gap:2px;position:relative;width:max-content}.rod:before{content:"";position:absolute;inset:calc(50% - 1px) 0;background:#877d69}.bead{position:relative;width:clamp(14px,4.5vw,25px);aspect-ratio:1;border-radius:50%;border:1px solid #514a3c;background:radial-gradient(circle at 35% 30%,#ffffff88,transparent 58%),var(--bead)}.sum{overflow-wrap:anywhere;font-weight:bold}.hint summary{cursor:pointer;padding:8px;color:#275f50;font-weight:bold}</style>
 <main>
 <nav><a href="../index.html">← Zur Spielauswahl</a></nav>
 <header><h1>✖️ Einmaleins-Trainer</h1><p>Übe deine Malreihen. Ganz in deinem Tempo.</p></header>
@@ -22,6 +22,13 @@
 <p class="task" id="task"></p>
 <div class="answers" id="answers" role="group" aria-label="Antwort auswählen"></div>
 <p id="feedback" role="status"></p>
+<details class="hint" id="hint">
+<summary>💡 Perlenhilfe</summary>
+<p id="hintIntro"></p>
+<div class="mat" id="mat" aria-hidden="true"></div>
+<p class="sum" id="hintStep" role="status" tabindex="-1"></p>
+<button type="button" id="addRod">Ein Stäbchen dazulegen</button>
+</details>
 <div class="actions"><button class="primary" id="next" hidden>Weiter →</button><button type="button" id="change">Reihen ändern</button></div>
 </section>
 <section class="card" id="finish" hidden>
@@ -63,8 +70,34 @@ function choices(row,factor){
   for(let n=1;wrong.length<3;n++)if(n!==correct&&!wrong.includes(n))wrong.push(n);
   return shuffle([correct,...wrong.slice(0,3)]);
 }
+const beadColors=['#bd383a','#399356','#e080ac','#f3cf46','#69bde0','#8757a8','#fff','#865337','#264681','#d99c31'];
+let rods=0;
+function addRod(){
+  const [groups,size]=tasks[index];
+  if(rods>=groups)return;
+  const rod=document.createElement('div');rod.className='rod';
+  rod.style.setProperty('--bead',beadColors[size-1]);
+  for(let i=0;i<size;i++){
+    const bead=document.createElement('span');bead.className='bead';rod.append(bead);
+  }
+  $('mat').append(rod);rods++;
+  const sum=Array(rods).fill(size).join(' + ');
+  $('hintStep').textContent=rods+' von '+groups+' Stäbchen: '+sum+(rods===groups?' = ?':'');
+  if(rods===groups){
+    $('addRod').textContent='Alle Stäbchen liegen da';
+    $('addRod').disabled=true;
+    if(document.activeElement===$('addRod'))$('hintStep').focus();
+  }
+}
+$('addRod').onclick=addRod;
+function resetHint(groups,size){
+  rods=0;$('hint').open=false;$('mat').replaceChildren();
+  $('hintIntro').textContent=groups+' × '+size+' heißt: '+groups+' Stäbchen mit je '+size+(size===1?' Perle.':' Perlen.');
+  $('hintStep').textContent='Lege die Stäbchen nacheinander hin.';
+  $('addRod').disabled=false;$('addRod').textContent='Ein Stäbchen dazulegen';
+}
 function showTask(){
-  const [row,factor]=tasks[index];solved=false;
+  const [row,factor]=tasks[index];solved=false;resetHint(row,factor);
   $('progress').textContent='Aufgabe '+(index+1)+' von '+tasks.length;
   $('task').textContent=row+' × '+factor+' = ?';$('feedback').textContent='';
   $('next').hidden=true;
