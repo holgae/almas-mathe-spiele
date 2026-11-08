@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zahlenzauber – Einmaleins</title>
 <style>
-:root{font-family:ui-rounded,'Trebuchet MS',sans-serif;color:#26334b;background:#f7f5ef}*{box-sizing:border-box}body{margin:0;padding:24px 16px;min-height:100vh;background:radial-gradient(ellipse at top left,#e0f3e8,transparent 65%),radial-gradient(ellipse at bottom right,#fce5ca,transparent 65%)}main{max-width:640px;margin:auto}header{text-align:center}h1{font-size:clamp(30px,8vw,46px)}p{line-height:1.5}.card{background:white;border:1px solid #dbe4df;border-radius:26px;padding:clamp(16px,5vw,28px)}fieldset{border:0;padding:0;margin:0}legend{font-weight:bold;margin-bottom:12px}.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:8px}.rows label{display:flex;align-items:center;justify-content:center;gap:5px;background:#f3f8f5;border-radius:12px;min-height:48px;cursor:pointer}.rows label:has(:checked){background:#d6eee0;color:#164738}.rows input{accent-color:#275f50}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a{color:#275f50}button{font:inherit;font-weight:bold;cursor:pointer;background:#f3f8f5;border:1px solid #bed7cc;border-radius:12px;padding:12px;min-height:44px}.primary{color:white;background:#275f50}button:disabled{opacity:.55;cursor:default}:focus-visible{outline:3px solid #bd760d;outline-offset:3px}[hidden]{display:none!important}.task{text-align:center;font-weight:bold;font-size:clamp(38px,10vw,64px);margin:20px 0}input[type=text]{font:inherit;width:8ch;padding:10px;border:2px solid #849c91;border-radius:10px}.progress{color:#536779}nav{margin-bottom:24px}
+:root{font-family:ui-rounded,'Trebuchet MS',sans-serif;color:#26334b;background:#f7f5ef}*{box-sizing:border-box}body{margin:0;padding:24px 16px;min-height:100vh;background:radial-gradient(ellipse at top left,#e0f3e8,transparent 65%),radial-gradient(ellipse at bottom right,#fce5ca,transparent 65%)}main{max-width:640px;margin:auto}header{text-align:center}h1{font-size:clamp(30px,8vw,46px)}p{line-height:1.5}.card{background:white;border:1px solid #dbe4df;border-radius:26px;padding:clamp(16px,5vw,28px)}fieldset{border:0;padding:0;margin:0}legend{font-weight:bold;margin-bottom:12px}.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(76px,1fr));gap:8px}.rows label{display:flex;align-items:center;justify-content:center;gap:5px;background:#f3f8f5;border-radius:12px;min-height:48px;cursor:pointer}.rows label:has(:checked){background:#d6eee0;color:#164738}.rows input{accent-color:#275f50}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a{color:#275f50}button{font:inherit;font-weight:bold;cursor:pointer;background:#f3f8f5;border:1px solid #bed7cc;border-radius:12px;padding:12px;min-height:44px}.primary{color:white;background:#275f50}button:disabled{opacity:.55;cursor:default}:focus-visible{outline:3px solid #bd760d;outline-offset:3px}[hidden]{display:none!important}.task{text-align:center;font-weight:bold;font-size:clamp(38px,10vw,64px);margin:20px 0}.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.answers button{font-size:clamp(24px,6vw,32px);min-height:60px}.answers .wrong{background:#fff0db;border-color:#d9a563}.answers .right{background:#d6eee0;border-color:#65a58d;opacity:1}.progress{color:#536779}nav{margin-bottom:24px}
 </style>
 <main>
 <nav><a href="../index.html">← Zur Spielauswahl</a></nav>
@@ -20,11 +20,7 @@
 <section class="card" id="play" hidden>
 <p class="progress" id="progress"></p>
 <p class="task" id="task"></p>
-<form id="answer">
-<label for="number">Deine Antwort</label>
-<input id="number" type="text" inputmode="numeric" maxlength="3" autocomplete="off" aria-describedby="task">
-<button class="primary" id="check">Prüfen</button>
-</form>
+<div class="answers" id="answers" role="group" aria-label="Antwort auswählen"></div>
 <p id="feedback" role="status"></p>
 <div class="actions"><button class="primary" id="next" hidden>Weiter →</button><button type="button" id="change">Reihen ändern</button></div>
 </section>
@@ -60,26 +56,45 @@ function makeRound(chosen){
 }
 let tasks=[],index=0,solved=false;
 function screen(id){for(const name of ['setup','play','finish'])$(name).hidden=name!==id}
+function choices(row,factor){
+  const correct=row*factor;
+  const nearby=[correct-row,correct+row,correct-factor,correct+factor,correct-1,correct+1];
+  const wrong=shuffle([...new Set(nearby.filter(n=>n>=1&&n<=100&&n!==correct))]);
+  for(let n=1;wrong.length<3;n++)if(n!==correct&&!wrong.includes(n))wrong.push(n);
+  return shuffle([correct,...wrong.slice(0,3)]);
+}
 function showTask(){
   const [row,factor]=tasks[index];solved=false;
   $('progress').textContent='Aufgabe '+(index+1)+' von '+tasks.length;
   $('task').textContent=row+' × '+factor+' = ?';$('feedback').textContent='';
-  $('number').value='';$('number').disabled=false;$('check').disabled=false;$('next').hidden=true;
-  $('number').focus();
+  $('next').hidden=true;
+  $('answers').replaceChildren(...choices(row,factor).map(value=>{
+    const button=document.createElement('button');
+    button.type='button';button.textContent=value;
+    button.onclick=()=>checkAnswer(button,value);
+    return button;
+  }));
+  $('answers').firstElementChild.focus();
 }
 function start(){
   const chosen=selected();if(!chosen.length)return;
   tasks=makeRound(chosen);index=0;screen('play');showTask();
 }
 $('settings').onsubmit=e=>{e.preventDefault();start()};
-$('answer').onsubmit=e=>{
-  e.preventDefault();if(solved)return;
-  const value=$('number').value.trim(),[row,factor]=tasks[index];
-  if(!/^\d+$/.test(value)){ $('feedback').textContent='Gib eine Zahl ein.';$('number').focus();return }
-  if(Number(value)!==row*factor){$('feedback').textContent='Fast! Versuch es noch einmal. 💛';$('number').select();return}
-  solved=true;$('feedback').textContent='Richtig! ⭐';$('number').disabled=true;$('check').disabled=true;
+function checkAnswer(button,value){
+  if(solved)return;
+  const [row,factor]=tasks[index];
+  if(value!==row*factor){
+    button.classList.add('wrong');button.disabled=true;
+    $('feedback').textContent='Fast! Versuch es noch einmal. 💛';
+    Array.from($('answers').children).find(choice=>!choice.disabled)?.focus();
+    return;
+  }
+  solved=true;button.classList.add('right');
+  for(const choice of $('answers').children)choice.disabled=true;
+  $('feedback').textContent='Richtig! ⭐';
   $('next').hidden=false;$('next').textContent=index+1===tasks.length?'Zur Auswertung →':'Weiter →';$('next').focus();
-};
+}
 $('next').onclick=()=>{
   if(!solved)return;
   if(++index<tasks.length){showTask();return}
